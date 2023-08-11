@@ -1,2 +1,2 @@
-# learning_golang
+# Изучение golang и просто пометки для запоминания
 Golang notes
