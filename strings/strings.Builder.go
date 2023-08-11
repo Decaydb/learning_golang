@@ -10,7 +10,7 @@ import(
 func main() {
   var builder strings.Builder 
 for i:=1; <=5; i++{
-  builder.WriteString(fmt.Sprinf("Какой-либо текст, который выводится в цикле несколько раз %d\n"))
+  builder.WriteString(fmt.Sprinf("Какой-либо текст, который выводится в цикле несколько раз" + "\n"))
   }
   result:= builder.String()
 println(result)
