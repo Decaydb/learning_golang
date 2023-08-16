@@ -1,0 +1,67 @@
+//Пример получения содержимого базы данных и поиска по массиву данных.
+
+package main
+
+import (
+	"strings"
+
+	"github.com/amironov73/GoIrbis/src/irbis" //Библиотека для работы с ИРБИС на Go
+)
+
+//Глобальные переменные для записи и перезаписи в любой из функций
+var fieldDepartment string = "56#" //Номер поля в текстовом представлении базы, в поле 56  записываются имена отделов, само поле хранит информацию о разрешенных местах выдачи литературы.
+var arrStrings []string //Основной массив в который будут писаться данные.
+
+//Это функция из примера от создателя библиотеки, но вместо вывода данных они пишутся в массив arrStrings.
+func readAndShowRecord(access *irbis.DirectAccess, mfn int) {
+	record, err := access.ReadRecord(mfn)
+	if err != nil {
+		panic(err)
+	}
+	arrStrings = append(arrStrings, record.String())
+}
+
+//Функция поиска отдела по нашему массиву данных и запись найденного в новый срез.
+func findDepartment(depName string, dbArray []string) {
+	newArr := make([]string, 0)
+	searchData := fieldDepartment + depName
+
+	for _, text := range dbArray {
+		if strings.Contains(text, searchData) {
+			newArr = append(newArr, text) // Добавляем строку в новый срез, если содержит нужный текст.
+		}
+	}
+	println("Место выдачи ОТДЕЛ: ", len(newArr)) //Выведет количество элементов массива(записей ИРБИС) в которых встречается поле 56 с записанным туда отделом "ОТДЕЛ".
+	//Вывод нового массива строк с полученными данными. Раскомментировать если нужно.
+	/*
+		for _, str := range newArr {
+			println(str) 
+		}
+	*/
+
+}
+
+func main() {
+	access, err := irbis.OpenDatabase("D:/IRBIS/rdr") //Так же из примера, но вместо директории ИРБИС указана диреткория со скопированными файлами которые получает эта функция. 
+//В данном случае используются файлы базы RDR, с расширениями: .IFP, .L01, .MST, .N01, .XRF
+	if err != nil {
+		panic(err)
+	}
+	defer access.Close()
+
+	println("Max MFN=", access.GetMaxMfn()) //Вывод максимального MFN в базе. Функция access.GetMaxMfn() может использоваться для вывода всей базы.
+	depName := "ОТДЕЛ" //Имя отдела.
+	for mfn := 1; mfn <= access.GetMaxMfn(); mfn++ {
+		readAndShowRecord(access, mfn)
+	}
+	findDepartment(depName, arrStrings)
+
+	//Вывод массива строк поэлементно. Если раскомментировать то выведет столько записей сколько указано в цикле выше.
+	/*
+		for _, str := range arrStrings {
+			println(str)
+		}
+	*/
+	println("Всего записей:", len(arrStrings)) //Выводит длину основного массива, то есть количество записей в массиве.
+
+}
